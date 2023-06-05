@@ -31,21 +31,26 @@ private:
 
 int main()
 {
-	SparseTable<TestClass, 2, 4> set;
-	auto a = set.Emplace(0);
-	auto b = set.Emplace(1);
-	auto c = set.Emplace(2);
-	auto d = set.Emplace(3);
+	SparseTable<std::string, 2, 4> set;
+	auto a = set.Emplace("Alice");
+	auto b = set.Emplace("Bob");
+	auto c = set.Emplace("Sasha");
+	auto d = set.Emplace("George");
 
-	auto e = set.Emplace(4);
-	auto f = set.Emplace(5);
-	auto g = set.Emplace(6);
-	auto h = set.Emplace(7);
+	auto e = set.Emplace("Pavel");
+	auto f = set.Emplace("Irina");
+	auto g = set.Emplace("Paul");
+	auto h = set.Emplace("Clara");
 
 	set.Remove(b);
 	set.Remove(g);
 
-	b = set.Emplace(1);
-	g = set.Emplace(6);
+	b = set.Emplace("Zurab");
+	g = set.Emplace("Ivan");
+
+	auto& str1 = set.At(b);
+
+	set.Clear();
+	a = set.Emplace("Alice");
 	return 0;
 }

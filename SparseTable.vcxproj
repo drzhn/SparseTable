@@ -128,7 +128,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Assert.h" />
+    <ClInclude Include="SparseSet.h" />
     <ClInclude Include="SparseTable.h" />
+    <ClInclude Include="SparseTableChunk.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
