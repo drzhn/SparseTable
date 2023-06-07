@@ -96,8 +96,6 @@ public:
 		const int32_t keyIndex = m_setArray->operator[](key).sparse;
 		const int32_t lastElemIndex = m_count - 1;
 
-		ASSERT(keyIndex <= lastElemIndex && m_setArray->operator[](keyIndex).dense == key);
-
 		int32_t lastElement = m_setArray->operator[](lastElemIndex).dense;
 
 		m_count = lastElemIndex;

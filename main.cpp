@@ -107,11 +107,11 @@ int main()
 	//set.Clear();
 
 
-	constexpr int maxIndex = 1'000'000;
+	constexpr int maxIndex = 1'000'001;
 
 	std::unordered_map<int, std::string> testMap;
 	SparseTable<std::string, 1, maxIndex> testStaticSet; // one big table with 1M elements
-	SparseTable<std::string, 10'000, 100> testDynamicSet; // 10K tables with 100 elements
+	SparseTable<std::string, 10'001, 100> testDynamicSet; // 10K tables with 100 elements
 
 	{
 		auto timer = ScopedClock("Insertion to map...................");
@@ -169,31 +169,74 @@ int main()
 		}
 	}
 
+	//{
+	//	auto timer = ScopedClock("Full removing from map.............");
+
+	//	for (int i = 0; i < maxIndex; i++)
+	//	{
+	//		testMap.erase(i);
+	//	}
+	//}
+
+
+	//{
+	//	auto timer = ScopedClock("Full removing from static sparse table......");
+
+	//	for (int i = 0; i < maxIndex; i++)
+	//	{
+	//		testStaticSet.Remove(i);
+	//	}
+	//}
+
+	//{
+	//	auto timer = ScopedClock("Full removing from dynamic sparse table.....");
+
+	//	for (int i = 0; i < maxIndex; i++)
+	//	{
+	//		testDynamicSet.Remove(i);
+	//	}
+	//}
+
 	{
-		auto timer = ScopedClock("Full removing from map.............");
+		auto timer = ScopedClock("Random removing from map...........");
 
 		for (int i = 0; i < maxIndex; i++)
 		{
-			testMap.erase(i);
+			int indexToRemove = i;
+			if (i%2 == 1)
+			{
+				indexToRemove = maxIndex - 1 - i;
+			}
+			testMap.erase(indexToRemove);
 		}
 	}
 
 
 	{
-		auto timer = ScopedClock("Full removing from static sparse table......");
+		auto timer = ScopedClock("Random removing from static sparse table......");
 
 		for (int i = 0; i < maxIndex; i++)
 		{
-			testStaticSet.Remove(i);
+			int indexToRemove = i;
+			if (i % 2 == 1)
+			{
+				indexToRemove = maxIndex - 1 - i;
+			}
+			testStaticSet.Remove(indexToRemove);
 		}
 	}
 
 	{
-		auto timer = ScopedClock("Full removing from dynamic sparse table.....");
+		auto timer = ScopedClock("Random removing from dynamic sparse table.....");
 
 		for (int i = 0; i < maxIndex; i++)
 		{
-			testDynamicSet.Remove(i);
+			int indexToRemove = i;
+			if (i % 2 == 1)
+			{
+				indexToRemove = maxIndex - 1 - i;
+			}
+			testDynamicSet.Remove(indexToRemove);
 		}
 	}
 
