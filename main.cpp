@@ -43,14 +43,37 @@ int main()
 	auto h = set.Emplace("Clara");
 
 	set.Remove(b);
-	set.Remove(g);
+	//set.Remove(g);
 
-	b = set.Emplace("Zurab");
-	g = set.Emplace("Ivan");
+	//b = set.Emplace("Zurab");
+	//g = set.Emplace("Ivan");
 
-	auto& str1 = set.At(b);
+	for (auto&& str : set)
+	{
+		std::cout << str << std::endl;
+	}
 
 	set.Clear();
+
+
 	a = set.Emplace("Alice");
+	b = set.Emplace("Bob");
+	c = set.Emplace("Sasha");
+	d = set.Emplace("George");
+
+	e = set.Emplace("Pavel");
+	f = set.Emplace("Irina");
+	g = set.Emplace("Paul");
+	h = set.Emplace("Clara");
+
+	set.Remove(b);
+
+	for (auto&& str : set)
+	{
+		std::cout << str << std::endl;
+	}
+
+	set.Clear();
+
 	return 0;
 }

@@ -1,9 +1,9 @@
 ﻿#ifndef SPARSE_TABLE_CHUNK_H
 #define SPARSE_TABLE_CHUNK_H
 
+#include "ScalarArray.h"
+#include "SparseSet.h"
 #include "Assert.h"
-
-#include <array>
 
 template <typename T, size_t Size>
 class SparseTableChunk
@@ -11,12 +11,14 @@ class SparseTableChunk
 public:
 	SparseTableChunk()
 	{
+		m_setArray = std::make_unique<ScalarArray<SetItem, Size>>();
+
 		m_data = static_cast<T*>(malloc(Size * sizeof(T))); // TODO aligned malloc
 
 		for (int32_t i = 0; i < Size; i++)
 		{
-			m_sparse[i] = 0;
-			m_dense[i] = i;
+			m_setArray->operator[](i).sparse = 0;
+			m_setArray->operator[](i).dense = i;
 		}
 		m_count = 0;
 	}
@@ -29,8 +31,7 @@ public:
 		m_data = other.m_data;
 		other.m_data = nullptr;
 
-		m_sparse = other.m_sparse; // TODO do smth with array copying 
-		m_dense = other.m_dense;
+		m_setArray= std::move(other.m_setArray);
 
 		m_count = other.m_count;
 		other.m_count = 0;
@@ -56,34 +57,34 @@ public:
 			{
 				m_data[i].~T();
 			}
-			m_sparse[i] = 0;
-			m_dense[i] = i;
+			m_setArray->operator[](i).sparse = 0;
+			m_setArray->operator[](i).dense = i;
 		}
 		m_count = 0;
 	}
 
-	bool ContainsKey(int32_t key) const
+	bool ContainsKey(int32_t key)
 	{
-		int32_t a = m_sparse[key];
-		return a >= 0 && a < m_count && m_dense[a] == key;
+		int32_t a = m_setArray->operator[](key).sparse;
+		return a >= 0 && a < m_count && m_setArray->operator[](a).dense == key;
 	}
 
 	template <typename... Args>
 	int32_t Emplace(Args&&... args)
 	{
-		int32_t key = m_dense[m_count];
+		int32_t key = m_setArray->operator[](m_count).dense;
 
 		ASSERT(m_count < Size);
 
-		int32_t a = m_sparse[key];
+		int32_t a = m_setArray->operator[](key).sparse;
 		int32_t n = m_count;
-		ASSERT(a >= n || m_dense[a] != key);
+		ASSERT(a >= n || m_setArray->operator[](a).dense != key);
 
-		m_sparse[key] = n;
-		m_dense[n] = key;
+		m_setArray->operator[](key).sparse = n;
+		m_setArray->operator[](n).dense = key;
 		m_count = n + 1;
 
-		T* objPtr = new(m_data + m_sparse[key]) T(std::forward<Args>(args)...);
+		T* objPtr = new(m_data + m_setArray->operator[](key).sparse) T(std::forward<Args>(args)...);
 
 		return key;
 	}
@@ -92,19 +93,19 @@ public:
 	{
 		ASSERT(ContainsKey(key));
 
-		const int32_t keyIndex = m_sparse[key];
+		const int32_t keyIndex = m_setArray->operator[](key).sparse;
 		const int32_t lastElemIndex = m_count - 1;
 
-		ASSERT(keyIndex <= lastElemIndex && m_dense[keyIndex] == key);
+		ASSERT(keyIndex <= lastElemIndex && m_setArray->operator[](keyIndex).dense == key);
 
-		int32_t lastElement = m_dense[lastElemIndex];
+		int32_t lastElement = m_setArray->operator[](lastElemIndex).dense;
 
 		m_count = lastElemIndex;
-		m_dense[keyIndex] = lastElement;
-		m_dense[m_count] = key;
+		m_setArray->operator[](keyIndex).dense = lastElement;
+		m_setArray->operator[](m_count).dense = key;
 
-		m_sparse[lastElement] = keyIndex;
-		m_sparse[keyIndex] = m_count;
+		m_setArray->operator[](lastElement).sparse = keyIndex;
+		m_setArray->operator[](keyIndex).sparse = m_count;
 
 		m_data[keyIndex] = std::move(m_data[lastElemIndex]);
 		m_data[lastElemIndex].~T();
@@ -113,8 +114,14 @@ public:
 	T& At(int32_t key)
 	{
 		ASSERT(ContainsKey(key));
-		int32_t elemIndex = m_sparse[key];
+		int32_t elemIndex = m_setArray->operator[](key).sparse;
 		return m_data[elemIndex];
+	}
+
+	T& operator[](int32_t index)
+	{
+		ASSERT(index >= 0 && index < m_count);
+		return m_data[index];
 	}
 
 	int32_t GetSize() const
@@ -125,17 +132,23 @@ public:
 private:
 	T* m_data = nullptr;
 
-	std::array<int32_t, Size> m_sparse;
-	std::array<int32_t, Size> m_dense;
+	std::unique_ptr<ScalarArray<SetItem, Size>> m_setArray;
 
 	int32_t m_count = 0;
 
 	// Iterators
 
 private:
-	class SparseTableChunkIterator : public std::iterator<std::bidirectional_iterator_tag, T>
+	class SparseTableChunkIterator
 	{
 	public:
+		using iterator_category = std::forward_iterator_tag;
+		using difference_type = std::ptrdiff_t;
+		using value_type = T;
+		using pointer = T*;
+		using reference = T&;
+
+
 		SparseTableChunkIterator(T* iter) : current(iter)
 		{
 		}
@@ -155,19 +168,6 @@ private:
 		{
 			SparseTableChunkIterator tmp = *this;
 			++(*this);
-			return tmp;
-		}
-
-		SparseTableChunkIterator& operator--()
-		{
-			--current;
-			return *this;
-		}
-
-		SparseTableChunkIterator operator--(int)
-		{
-			SparseTableChunkIterator tmp = *this;
-			--(*this);
 			return tmp;
 		}
 

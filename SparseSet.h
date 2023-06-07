@@ -1,8 +1,16 @@
 ﻿#ifndef SPARSE_SET_H
 #define SPARSE_SET_H
 
+#include "ScalarArray.h"
 
 #include "Assert.h"
+
+struct SetItem
+{
+	int32_t sparse;
+	int32_t dense;
+};
+
 
 template <size_t Size>
 class SparseSet
@@ -10,10 +18,12 @@ class SparseSet
 public:
 	SparseSet()
 	{
+		m_setArray = std::make_unique<ScalarArray<SetItem, Size>>();
+
 		for (int32_t i = 0; i < Size; i++)
 		{
-			m_sparse[i] = 0;
-			m_dense[i] = 0;
+			m_setArray->operator[](i).sparse = 0;
+			m_setArray->operator[](i).dense = 0;
 		}
 	}
 
@@ -21,39 +31,49 @@ public:
 	{
 		ASSERT(!ContainsKey(key));
 
-		int32_t a = m_sparse[key];
+		int32_t a = m_setArray->operator[](key).sparse;
 		int32_t n = m_count;
-		ASSERT(a >= n || m_dense[a] != key);
+		ASSERT(a >= n || m_setArray->operator[](a).dense != key);
 
-		m_sparse[key] = n;
-		m_dense[n] = key;
+		m_setArray->operator[](key).sparse = n;
+		m_setArray->operator[](n).dense = key;
 		m_count++;
 	}
 
 	void Remove(int32_t key)
 	{
 		ASSERT(ContainsKey(key));
-		int32_t a = m_sparse[key];
+		int32_t a = m_setArray->operator[](key).sparse;
 		int32_t n = m_count - 1;
 
-		ASSERT(a <= n && m_dense[a] == key)
-			int32_t e = m_dense[n];
+		ASSERT(a <= n && m_setArray->operator[](a).dense == key)
+		int32_t e = m_setArray->operator[](n).dense;
 
 		m_count = n;
-		m_dense[a] = e;
-		m_sparse[e] = a;
+		m_setArray->operator[](a).dense = e;
+		m_setArray->operator[](e).sparse = a;
+	}
+
+	void Clear()
+	{
+		for (int32_t i = 0; i < Size; i++)
+		{
+			m_setArray->operator[](i).sparse = 0;
+			m_setArray->operator[](i).dense = 0;
+		}
+		m_count = 0;
 	}
 
 	bool ContainsKey(int32_t k)
 	{
-		int32_t a = m_sparse[k];
-		return a < m_count && m_dense[a] == k;
+		int32_t a = m_setArray->operator[](k).sparse;
+		return a < m_count && m_setArray->operator[](a).dense == k;
 	}
 
 	int32_t operator[](int32_t index)
 	{
 		ASSERT(index < m_count);
-		return m_dense[index];
+		return m_setArray->operator[](index).dense;
 	}
 
 	int32_t GetSize() const
@@ -62,8 +82,7 @@ public:
 	}
 
 private:
-	int32_t m_sparse[Size]{};
-	int32_t m_dense[Size]{};
+	std::unique_ptr<ScalarArray<SetItem, Size>> m_setArray;
 	int32_t m_count = 0;
 };
 #endif // SPARSE_SET_H

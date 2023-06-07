@@ -43,6 +43,7 @@ public:
 			m_nonFullTables.Remove(tableIndex);
 		}
 
+		m_count++;
 
 		return tableIndex * TableSize + itemIndex;
 	}
@@ -57,6 +58,7 @@ public:
 		ASSERT(table.ContainsKey(itemIndex));
 
 		table.Remove(itemIndex);
+		m_count--;
 
 		if (table.GetSize() == 0)
 		{
@@ -100,10 +102,104 @@ public:
 			table.Clear();
 		}
 		m_tables.Clear();
+		m_nonFullTables.Clear();
+		m_count = 0;
+	}
+
+	int32_t GetSize() const
+	{
+		return m_count;
 	}
 
 private:
 	SparseTableChunk<TableT, MaxTablesCount> m_tables;
 	SparseSet<MaxTablesCount> m_nonFullTables;
+
+	int32_t m_count = 0;
+
+	// Iterators
+
+private:
+	class SparseTableIterator
+	{
+	public:
+		using iterator_category = std::forward_iterator_tag;
+		using difference_type = std::ptrdiff_t;
+		using value_type = T;
+		using pointer = T*;
+		using reference = T&;
+
+
+		SparseTableIterator(T* currentItem, SparseTableChunk<TableT, MaxTablesCount>& tables) :
+			m_currentItem(currentItem),
+			m_currentItemIndex(0),
+			m_currentTableIndex(0),
+			m_tables(tables)
+		{
+			// we consider non-null current item as first item in the first table
+		}
+
+		T& operator*() const
+		{
+			return *m_currentItem;
+		}
+
+		SparseTableIterator& operator++()
+		{
+			m_currentItemIndex += 1;
+
+
+			if (m_currentItemIndex >= m_tables[m_currentTableIndex].GetSize())
+			{
+				m_currentItemIndex = 0;
+				m_currentTableIndex += 1;
+			}
+			if (m_currentTableIndex >= m_tables.GetSize())
+			{
+				m_currentItem = nullptr;
+				return *this;
+			}
+
+			m_currentItem = &m_tables[m_currentTableIndex][m_currentItemIndex];
+			return *this;
+		}
+
+		//SparseTableIterator operator++(int)
+		//{
+		//	SparseTableIterator tmp = *this;
+		//	++(*this);
+		//	return tmp;
+		//}
+
+		bool operator==(const SparseTableIterator& other) const
+		{
+			return m_currentItem == other.m_currentItem;
+		}
+
+		bool operator!=(const SparseTableIterator& other) const
+		{
+			return !(*this == other);
+		}
+
+	private:
+		T* m_currentItem;
+		//TableT* m_currentTable;
+
+		int32_t m_currentItemIndex;
+		int32_t m_currentTableIndex;
+
+		SparseTableChunk<TableT, MaxTablesCount>& m_tables;
+	};
+
+public:
+	SparseTableIterator begin()
+	{
+		return m_tables.GetSize() > 0 ? SparseTableIterator(&m_tables[0][0], m_tables) : end();
+	}
+
+	SparseTableIterator end()
+	{
+		return SparseTableIterator(nullptr, m_tables);
+	}
 };
 #endif // SPARSE_TABLE_H
