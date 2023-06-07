@@ -1,3 +1,8 @@
+#include <map>
+#include <chrono>
+#include <iostream>
+#include <unordered_map>
+
 #include "SparseTable.h"
 
 class TestClass
@@ -28,52 +33,170 @@ private:
 	int m_number = -1;
 };
 
+class ScopedClock
+{
+public:
+	ScopedClock() = delete;
+
+	ScopedClock(const char* msg):
+		m_timePoint(std::chrono::high_resolution_clock::now()),
+		m_msg(msg)
+	{
+	}
+
+	~ScopedClock()
+	{
+		std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double, std::milli> dur = now - m_timePoint;
+		std::cout << m_msg << ": " << dur.count() << " ms" << std::endl;
+	}
+
+	std::chrono::time_point<std::chrono::high_resolution_clock> m_timePoint;
+	const char* m_msg;
+};
+
 
 int main()
 {
-	SparseTable<std::string, 2, 4> set;
-	auto a = set.Emplace("Alice");
-	auto b = set.Emplace("Bob");
-	auto c = set.Emplace("Sasha");
-	auto d = set.Emplace("George");
+	//SparseTable<std::string, 3, 4> set;
+	//auto a = set.Emplace("Alice");
+	//auto b = set.Emplace("Bob");
+	//auto c = set.Emplace("Sasha");
+	//auto d = set.Emplace("George");
 
-	auto e = set.Emplace("Pavel");
-	auto f = set.Emplace("Irina");
-	auto g = set.Emplace("Paul");
-	auto h = set.Emplace("Clara");
+	//auto e = set.Emplace("Pavel");
+	//auto f = set.Emplace("Irina");
+	//auto g = set.Emplace("Paul");
+	//auto h = set.Emplace("Clara");
 
-	set.Remove(b);
+	//auto i = set.Emplace("Grisha");
+
+	////set.Remove(b);
 	//set.Remove(g);
 
-	//b = set.Emplace("Zurab");
+	////b = set.Emplace("Zurab");
 	//g = set.Emplace("Ivan");
 
-	for (auto&& str : set)
+	//for (auto&& str : set)
+	//{
+	//	std::cout << str << std::endl;
+	//}
+
+	//set.Clear();
+
+
+	//a = set.Emplace("Alice");
+	//b = set.Emplace("Bob");
+	//c = set.Emplace("Sasha");
+	//d = set.Emplace("George");
+
+	//e = set.Emplace("Pavel");
+	//f = set.Emplace("Irina");
+	//g = set.Emplace("Paul");
+	//h = set.Emplace("Clara");
+
+	//
+
+	//set.Remove(b);
+
+	//for (auto&& str : set)
+	//{
+	//	std::cout << str << std::endl;
+	//}
+
+	//set.Clear();
+
+
+	constexpr int maxIndex = 1'000'000;
+
+	std::unordered_map<int, std::string> testMap;
+	SparseTable<std::string, 1, maxIndex> testStaticSet; // one big table with 1M elements
+	SparseTable<std::string, 10'000, 100> testDynamicSet; // 10K tables with 100 elements
+
 	{
-		std::cout << str << std::endl;
+		auto timer = ScopedClock("Insertion to map...................");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testMap.insert({i, "Alice"});
+		}
 	}
 
-	set.Clear();
-
-
-	a = set.Emplace("Alice");
-	b = set.Emplace("Bob");
-	c = set.Emplace("Sasha");
-	d = set.Emplace("George");
-
-	e = set.Emplace("Pavel");
-	f = set.Emplace("Irina");
-	g = set.Emplace("Paul");
-	h = set.Emplace("Clara");
-
-	set.Remove(b);
-
-	for (auto&& str : set)
 	{
-		std::cout << str << std::endl;
+		auto timer = ScopedClock("Insertion to static sparse table...");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testStaticSet.Emplace("Alice");
+		}
 	}
 
-	set.Clear();
+	{
+		auto timer = ScopedClock("Insertion to dynamic sparse table..");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testDynamicSet.Emplace("Alice");
+		}
+	}
+
+
+	{
+		auto timer = ScopedClock("Foreach on map.....................");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testMap.at(i).replace(0, 1, "B");
+		}
+	}
+
+
+	{
+		auto timer = ScopedClock("Foreach on static sparse table.....");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testStaticSet.At(i).replace(0, 1, "B");
+		}
+	}
+
+	{
+		auto timer = ScopedClock("Foreach on dynamic sparse table....");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testDynamicSet.At(i).replace(0, 1, "B");
+		}
+	}
+
+	{
+		auto timer = ScopedClock("Full removing from map.............");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testMap.erase(i);
+		}
+	}
+
+
+	{
+		auto timer = ScopedClock("Full removing from static sparse table......");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testStaticSet.Remove(i);
+		}
+	}
+
+	{
+		auto timer = ScopedClock("Full removing from dynamic sparse table.....");
+
+		for (int i = 0; i < maxIndex; i++)
+		{
+			testDynamicSet.Remove(i);
+		}
+	}
+
 
 	return 0;
 }
