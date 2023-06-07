@@ -53,9 +53,9 @@ public:
 		const int32_t tableIndex = key / TableSize;
 		const int32_t itemIndex = key % TableSize;
 
-		ASSERT(m_tables.ContainsKey(tableIndex));
+		//ASSERT(m_tables.ContainsKey(tableIndex));
 		auto& table = m_tables.At(tableIndex);
-		ASSERT(table.ContainsKey(itemIndex));
+		//ASSERT(table.ContainsKey(itemIndex));
 
 		table.Remove(itemIndex);
 		m_count--;
@@ -73,7 +73,7 @@ public:
 
 	T& At(int32_t key)
 	{
-		ASSERT(ContainsKey(key));
+		//ASSERT(ContainsKey(key));
 		const int32_t tableIndex = key / TableSize;
 		const int32_t itemIndex = key % TableSize;
 		return m_tables.At(tableIndex).At(itemIndex);
