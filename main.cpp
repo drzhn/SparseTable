@@ -154,19 +154,27 @@ int main()
 	{
 		auto timer = ScopedClock("Foreach on static sparse table.....");
 
-		for (int i = 0; i < maxIndex; i++)
+		for (auto && item: testStaticSet)
 		{
-			testStaticSet.At(i).replace(0, 1, "B");
+			item.replace(0, 1, "B");
 		}
+		//for (int i = 0; i < maxIndex; i++)
+		//{
+		//	testStaticSet.At(i).replace(0, 1, "B");
+		//}
 	}
 
 	{
 		auto timer = ScopedClock("Foreach on dynamic sparse table....");
 
-		for (int i = 0; i < maxIndex; i++)
+		for (auto&& item : testDynamicSet)
 		{
-			testDynamicSet.At(i).replace(0, 1, "B");
+			item.replace(0, 1, "B");
 		}
+		//for (int i = 0; i < maxIndex; i++)
+		//{
+		//	testDynamicSet.At(i).replace(0, 1, "B");
+		//}
 	}
 
 	//{
