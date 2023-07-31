@@ -3,10 +3,8 @@
 
 #include "SparseSet.h"
 #include "SparseTableChunk.h"
-#include "Assert.h"
 
 #include <cstdint>
-#include <memory>
 
 template <typename T, size_t MaxTablesCount, size_t TableSize>
 class SparseTable
@@ -28,7 +26,7 @@ public:
 			tableIndex = m_tables.Emplace();
 		}
 
-		ASSERT_DESC(tableIndex != -1, "SparseTable is full, increase MaxTablesCount");
+		SPTABLE_ASSERT(tableIndex != -1); // SparseTable is full, increase MaxTablesCount
 
 		const int32_t itemIndex = m_tables.At(tableIndex).Emplace(std::forward<Args>(args)...);
 
@@ -39,7 +37,7 @@ public:
 
 		if (m_tables.At(tableIndex).GetSize() == TableSize)
 		{
-			ASSERT(m_nonFullTables.ContainsKey(tableIndex));
+			SPTABLE_ASSERT(m_nonFullTables.ContainsKey(tableIndex));
 			m_nonFullTables.Remove(tableIndex);
 		}
 
@@ -53,9 +51,9 @@ public:
 		const int32_t tableIndex = key / TableSize;
 		const int32_t itemIndex = key % TableSize;
 
-		//ASSERT(m_tables.ContainsKey(tableIndex));
+		//SPTABLE_ASSERT(m_tables.ContainsKey(tableIndex));
 		auto& table = m_tables.At(tableIndex);
-		//ASSERT(table.ContainsKey(itemIndex));
+		//SPTABLE_ASSERT(table.ContainsKey(itemIndex));
 
 		table.Remove(itemIndex);
 		m_count--;
@@ -73,7 +71,7 @@ public:
 
 	T& At(int32_t key)
 	{
-		//ASSERT(ContainsKey(key));
+		//SPTABLE_ASSERT(ContainsKey(key));
 		const int32_t tableIndex = key / TableSize;
 		const int32_t itemIndex = key % TableSize;
 		return m_tables.At(tableIndex).At(itemIndex);

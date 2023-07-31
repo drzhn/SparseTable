@@ -3,7 +3,6 @@
 
 #include "ScalarArray.h"
 #include "SparseSet.h"
-#include "Assert.h"
 
 template <typename T, size_t Size>
 class SparseTableChunk
@@ -41,7 +40,10 @@ public:
 
 	~SparseTableChunk()
 	{
-		ASSERT_DESC(m_count == 0, "Please, call Clear() before destructor"); // we need guarantees that we delete table after removing all elements from it
+		// we need guarantees that we delete table after removing all elements from it
+		// So please, call Clear() before destructor"
+		SPTABLE_ASSERT(m_count == 0);
+
 		if (m_data != nullptr)
 		{
 			free(m_data);
@@ -74,11 +76,11 @@ public:
 	{
 		int32_t key = m_setArray->operator[](m_count).dense;
 
-		ASSERT(m_count < Size);
+		SPTABLE_ASSERT(m_count < Size);
 
 		int32_t a = m_setArray->operator[](key).sparse;
 		int32_t n = m_count;
-		ASSERT(a >= n || m_setArray->operator[](a).dense != key);
+		SPTABLE_ASSERT(a >= n || m_setArray->operator[](a).dense != key);
 
 		m_setArray->operator[](key).sparse = n;
 		m_setArray->operator[](n).dense = key;
@@ -91,7 +93,7 @@ public:
 
 	void Remove(int32_t key)
 	{
-		ASSERT(ContainsKey(key));
+		SPTABLE_ASSERT(ContainsKey(key));
 
 		const int32_t keyIndex = m_setArray->operator[](key).sparse;
 		const int32_t lastElemIndex = m_count - 1;
@@ -111,14 +113,14 @@ public:
 
 	T& At(int32_t key)
 	{
-		ASSERT(ContainsKey(key));
+		SPTABLE_ASSERT(ContainsKey(key));
 		int32_t elemIndex = m_setArray->operator[](key).sparse;
 		return m_data[elemIndex];
 	}
 
 	T& operator[](int32_t index)
 	{
-		ASSERT(index >= 0 && index < m_count);
+		SPTABLE_ASSERT(index >= 0 && index < m_count);
 		return m_data[index];
 	}
 

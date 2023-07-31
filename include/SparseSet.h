@@ -3,7 +3,7 @@
 
 #include "ScalarArray.h"
 
-#include "Assert.h"
+#include "SptableAssert.h"
 
 struct SetItem
 {
@@ -29,11 +29,11 @@ public:
 
 	void Insert(int32_t key)
 	{
-		ASSERT(!ContainsKey(key));
+		SPTABLE_ASSERT(!ContainsKey(key));
 
 		int32_t a = m_setArray->operator[](key).sparse;
 		int32_t n = m_count;
-		ASSERT(a >= n || m_setArray->operator[](a).dense != key);
+		SPTABLE_ASSERT(a >= n || m_setArray->operator[](a).dense != key);
 
 		m_setArray->operator[](key).sparse = n;
 		m_setArray->operator[](n).dense = key;
@@ -42,11 +42,11 @@ public:
 
 	void Remove(int32_t key)
 	{
-		ASSERT(ContainsKey(key));
+		SPTABLE_ASSERT(ContainsKey(key));
 		int32_t a = m_setArray->operator[](key).sparse;
 		int32_t n = m_count - 1;
 
-		ASSERT(a <= n && m_setArray->operator[](a).dense == key)
+		SPTABLE_ASSERT(a <= n && m_setArray->operator[](a).dense == key)
 		int32_t e = m_setArray->operator[](n).dense;
 
 		m_count = n;
@@ -72,7 +72,7 @@ public:
 
 	int32_t operator[](int32_t index)
 	{
-		ASSERT(index < m_count);
+		SPTABLE_ASSERT(index < m_count);
 		return m_setArray->operator[](index).dense;
 	}
 

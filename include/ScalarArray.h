@@ -1,7 +1,7 @@
 ﻿#ifndef SCALAR_ARRAY_H
 #define SCALAR_ARRAY_H
 
-#include "Assert.h"
+#include <type_traits>
 
 template <typename T, size_t Size> requires std::is_trivial_v<T>
 class ScalarArray

@@ -15,24 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Assert.h">
+    <ClInclude Include="include\SptableAssert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SparseTable.h">
+    <ClInclude Include="include\SparseTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SparseSet.h">
+    <ClInclude Include="include\SparseSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SparseTableChunk.h">
+    <ClInclude Include="include\SparseTableChunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScalarArray.h">
+    <ClInclude Include="include\ScalarArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="test\test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
