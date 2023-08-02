@@ -86,8 +86,7 @@ public:
 		m_setArray->operator[](n).dense = key;
 		m_count = n + 1;
 
-		//T* objPtr = new(m_data + m_setArray->operator[](key).sparse) T(std::forward<Args>(args)...);
-		T* objPtr = new(m_data + key) T(std::forward<Args>(args)...);
+		T* objPtr = new(m_data + m_setArray->operator[](key).sparse) T(std::forward<Args>(args)...);
 
 		return key;
 	}
@@ -108,28 +107,21 @@ public:
 		m_setArray->operator[](lastElement).sparse = keyIndex;
 		m_setArray->operator[](keyIndex).sparse = m_count;
 
-		//m_data[keyIndex] = std::move(m_data[lastElemIndex]);
-		//m_data[lastElemIndex].~T();
-
-		m_data[key].~T();
-
+		m_data[keyIndex] = std::move(m_data[lastElemIndex]);
+		m_data[lastElemIndex].~T();
 	}
 
 	T& At(int32_t key)
 	{
 		SPTABLE_ASSERT(ContainsKey(key));
-		//int32_t elemIndex = m_setArray->operator[](key).sparse;
-		//return m_data[elemIndex];
-		return m_data[key];
+		int32_t elemIndex = m_setArray->operator[](key).sparse;
+		return m_data[elemIndex];
 	}
 
 	T& operator[](int32_t index)
 	{
 		SPTABLE_ASSERT(index >= 0 && index < m_count);
-		//return m_data[index];
-
-		int32_t elemIndex = m_setArray->operator[](index).dense;
-		return m_data[elemIndex];
+		return m_data[index];
 	}
 
 	int32_t GetSize() const
