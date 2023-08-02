@@ -58,31 +58,27 @@ public:
 
 int main()
 {
-	//SparseTable<std::string, 3, 4> set;
-	//auto a = set.Emplace("Alice");
-	//auto b = set.Emplace("Bob");
-	//auto c = set.Emplace("Sasha");
-	//auto d = set.Emplace("George");
+	SparseTable<std::string, 2, 4> set;
+	auto a = set.Emplace("Alice");
+	auto b = set.Emplace("Bob");
+	auto c = set.Emplace("Sasha");
+	auto d = set.Emplace("George");
 
-	//auto e = set.Emplace("Pavel");
-	//auto f = set.Emplace("Irina");
-	//auto g = set.Emplace("Paul");
-	//auto h = set.Emplace("Clara");
+	auto e = set.Emplace("Pavel");
+	auto f = set.Emplace("Irina");
+	auto g = set.Emplace("Grisha");
+	auto h = set.Emplace("Clara");
 
-	//auto i = set.Emplace("Grisha");
+	set.Remove(g);
 
-	////set.Remove(b);
-	//set.Remove(g);
+	g = set.Emplace("Ivan");
 
-	////b = set.Emplace("Zurab");
-	//g = set.Emplace("Ivan");
+	for (auto&& str : set)
+	{
+		std::cout << str << std::endl;
+	}
 
-	//for (auto&& str : set)
-	//{
-	//	std::cout << str << std::endl;
-	//}
-
-	//set.Clear();
+	set.Clear();
 
 
 	//a = set.Emplace("Alice");
