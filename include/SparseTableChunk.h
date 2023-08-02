@@ -107,8 +107,14 @@ public:
 		m_setArray->operator[](lastElement).sparse = keyIndex;
 		m_setArray->operator[](keyIndex).sparse = m_count;
 
-		m_data[keyIndex] = std::move(m_data[lastElemIndex]);
-		m_data[lastElemIndex].~T();
+		// WARNING: in perfect world T should be trivially copyable
+		// I just hope that it will work. but you can use move assignment
+		m_data[keyIndex].~T();
+		memcpy(&m_data[keyIndex], &m_data[lastElemIndex], sizeof(T));
+
+		// like that: 
+		//m_data[keyIndex] = std::move(m_data[lastElemIndex]);
+		//m_data[lastElemIndex].~T();
 	}
 
 	T& At(int32_t key)
